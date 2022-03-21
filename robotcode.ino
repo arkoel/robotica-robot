@@ -1,8 +1,14 @@
 //Arduino PWM Speed Control：
-int E1 = 5; //
+int E1 = 5;
 int M1 = 4;
 int E2 = 6;
 int M2 = 7;
+
+const int l1 = analogRead(A0);
+const int l2 = analogRead(A1);
+const int l3 = analogRead(A2);
+const int l4 = analogRead(A3);
+const int l5 = analogRead(A4);
 
 void setup()
 {
@@ -46,11 +52,11 @@ void loop()
 
     // LIJN SENSOR
     analogRead(A0);
-    Serial.println(analogRead(A0));
-    Serial.println(analogRead(A1));
-    Serial.println(analogRead(A2));
-    Serial.println(analogRead(A3));
-    Serial.println(analogRead(A4));
+    Serial.println(l1);
+    Serial.println(l2);
+    Serial.println(l3);
+    Serial.println(l4);
+    Serial.println(l5);
 
     // PING SENSOR
 

@@ -1,4 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "robotcode.ino"
+    "sketch": "robotcode.ino",
+    "programmer": "arduino:avrisp"
 }
