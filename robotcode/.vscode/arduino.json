@@ -1,0 +1,6 @@
+{
+    "sketch": "robotcode.ino",
+    "board": "arduino:avr:uno",
+    "programmer": "arduino:avrisp",
+    "port": "COM1"
+}
