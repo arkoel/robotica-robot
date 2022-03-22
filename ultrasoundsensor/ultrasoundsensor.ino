@@ -28,7 +28,22 @@ void setup() {
   pinMode(M1, OUTPUT);
   pinMode(M2, OUTPUT);
 }
+
+boolean lijnsensoren[5]; 
+
+boolean startup = true;
+
 void loop() {
+  char a = 'A';
+  for (int i = 0; i < 5; i++) {
+    lijnsensoren[i] = (digitalRead(a + i) < 30);
+  }
+
+  if(sum(lijnsensoren, 5) == 1) {
+    3 - getNumber(lijnsensoren, 1);
+  }
+
+
   // Clears the trigPin condition
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
@@ -46,13 +61,56 @@ void loop() {
   Serial.println(" cm");
 
   // Start driving, slow down when object is near
-  digitalWrite(M1,LOW);
-  digitalWrite(M2, HIGH);
-  analogWrite(E1,70);   //PWM Speed Control
-  analogWrite(E2,70);   //PWM Speed Control
-  if(distance < 5) {
-    delay(1000);
+    digitalWrite(M1,LOW);
+    digitalWrite(M2, HIGH);
+    
+  if(distance < 10) {
     analogWrite(E1, 0);
     analogWrite(E2, 0);
+    delay(1000);
+    startup=true;
+    start();
+    turn(1000);
+    startup=false;
+  } else {
+    if(startup){
+    start();
+    startup=false;
+    }
   }
+}
+void start(){
+    analogWrite(E1,70);   //PWM Speed Control
+    analogWrite(E2,70);   //PWM Speed Control
+    delay(500);
+    analogWrite(E1,45);   //PWM Speed Control
+    analogWrite(E2,45);   //PWM Speed Control
+}
+
+void turn(int time) {
+  digitalWrite(M1,HIGH);
+  digitalWrite(M2, HIGH);
+  start();
+  delay(time);
+}
+
+int sum(bool arr[], int n)
+{
+    int sum = 0; // initialize sum
+ 
+    // Iterate through all elements
+    // and add them to sum
+    for (int i = 0; i < n; i++)
+    sum += arr[i];
+ 
+    return sum;
+}
+
+int getNumber(bool arr[], int n) {
+  for (int i = 0; i < 5; i++) {
+    if(arr[i] == 1) {
+      return i;
+    }
+  }
+  return 0;
 }
