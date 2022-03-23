@@ -18,6 +18,15 @@ int M1 = 4;
 int E2 = 6;
 int M2 = 7;
 
+boolean lijnsensoren[5]; 
+
+boolean startup = true;
+static const uint8_t analog_pins[] = {A0,A1,A2,A3,A4};
+boolean state = 1;
+//state 1=straight, 0=turning
+int difference;
+
+
 void setup() {
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an OUTPUT
   pinMode(echoPin, INPUT); // Sets the echoPin as an INPUT
@@ -27,41 +36,51 @@ void setup() {
 
   pinMode(M1, OUTPUT);
   pinMode(M2, OUTPUT);
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(A3, INPUT);
+  pinMode(A4, INPUT);
+
 }
 
-boolean lijnsensoren[5]; 
-
-boolean startup = true;
-
 void loop() {
-  char a = 'A';
+  
+  if(state){
   for (int i = 0; i < 5; i++) {
-    lijnsensoren[i] = (digitalRead(a + i) < 30);
+    lijnsensoren[i] = (analogRead(analog_pins[i]) < 30);
   }
 
   if(sum(lijnsensoren, 5) == 1) {
-    3 - getNumber(lijnsensoren, 1);
+    difference = 3 - getNumber(lijnsensoren, 1);
+    if(difference<0){
+      digitalWrite(M1, HIGH);
+      digitalWrite(M2, HIGH);
+      turn(abs(difference)*500);
+    }else if(difference>0){
+      digitalWrite(M1, LOW);
+      digitalWrite(M2, LOW);
+      turn(abs(difference)*500);
+    }else{
+      digitalWrite(M1, LOW);
+      digitalWrite(M2, HIGH);
+    }
+
+  
+
+
+
+
+
+
   }
 
 
-  // Clears the trigPin condition
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  // Reads the echoPin, returns the sound wave travel time in microseconds
-  duration = pulseIn(echoPin, HIGH);
-  // Calculating the distance
-  distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
-  // Displays the distance on the Serial Monitor
-  Serial.print("Distance: ");
-  Serial.print(distance);
-  Serial.println(" cm");
+  }
+
 
   // Start driving, slow down when object is near
-    digitalWrite(M1,LOW);
+    digitalWrite(M1, LOW);
     digitalWrite(M2, HIGH);
     
   if(distance < 10) {
@@ -113,4 +132,23 @@ int getNumber(bool arr[], int n) {
     }
   }
   return 0;
+}
+
+int getdistance(){
+  // Clears the trigPin condition
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
+  // Calculating the distance
+  distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
+  // Displays the distance on the Serial Monitor
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+  return distance;
 }
