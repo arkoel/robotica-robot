@@ -65,19 +65,8 @@ void loop() {
       digitalWrite(M1, LOW);
       digitalWrite(M2, HIGH);
     }
-
-  
-
-
-
-
-
-
   }
-
-
   }
-
 
   // Start driving, slow down when object is near
     digitalWrite(M1, LOW);
