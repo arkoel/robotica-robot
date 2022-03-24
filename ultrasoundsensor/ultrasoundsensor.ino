@@ -45,7 +45,7 @@ void loop()
       lijnsensoren[i] = (analogRead(analog_pins[i]) < 30);
     }
 
-    if (sum(lijnsensoren, 5) == 1)
+    if (sum(lijnsensoren, 5) < 3 && sum(lijnsensoren, 5) > 0)
     {
       difference = 3 - getNumber(lijnsensoren, 1);
       if (difference < 0)
