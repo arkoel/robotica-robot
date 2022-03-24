@@ -64,6 +64,16 @@ void loop()
       // delay(1000);
     }
 
+    distance = getdistance();
+    // PING SENSOR
+    if (distance < 10) {
+      analogWrite(E1, 0);
+      analogWrite(E2, 0);
+      delay(750);
+      turnRight(1);
+      // delay(250);
+    }
+
     // Serial.println(sum(lijnsensoren, 5));
     // delay(1000);
 
@@ -103,12 +113,7 @@ void loop()
       //     analogWrite(E2, 0); // PWM Speed Control
       //     one_eighty(400);
       // }
-      // if (distance < 10)
-      // {
-      //   analogWrite(E1, 0);
-      //   analogWrite(E2, 0);
-      //   one_eighty(100);
-      // }
+      
     }
   }
 
@@ -116,19 +121,18 @@ void loop()
   {
     digitalWrite(M1, HIGH);
     digitalWrite(M2, HIGH);
-    turn(abs(difference) * 100);
+    turn(abs(difference) * 50);
   }
 
   void turnLeft(int difference)
   {
     digitalWrite(M1, LOW);
     digitalWrite(M2, LOW);
-    turn(abs(difference) * 100);
+    turn(abs(difference) * 50);
   }
 
   void turn(int time)
   {
-
     analogWrite(E1, 70); // PWM Speed Control
     analogWrite(E2, 70); // PWM Speed Control
     delay(time);
