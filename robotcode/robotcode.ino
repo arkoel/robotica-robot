@@ -25,7 +25,7 @@ void setup()
 }
 
 void loop()
-{
+{   
     // WIEL BESTURING
     digitalWrite(M1,LOW);
     digitalWrite(M2, HIGH);
