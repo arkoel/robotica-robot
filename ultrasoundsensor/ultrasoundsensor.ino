@@ -10,6 +10,25 @@ int M1 = 4;
 int E2 = 6;
 int M2 = 7;
 
+bool oplossingsRoute[100];
+
+
+
+byte segValue[13][7] = {
+    {1, 1, 1, 1, 1, 1, 0}, // 0
+    {1, 0, 0, 1, 0, 0, 0}, // 1
+    {0, 1, 1, 1, 1, 0, 1}, // 2
+    {1, 1, 0, 1, 1, 0, 1}, // 3
+    {1, 0, 0, 1, 0, 1, 1}, // 4
+    {1, 1, 0, 0, 1, 1, 1}, // 5
+    {1, 1, 1, 0, 1, 1, 1}, // 6
+    {1, 0, 0, 1, 1, 0, 0}, // 7
+    {1, 1, 1, 1, 1, 1, 1}, // 8
+    {1, 1, 0, 1, 1, 1, 1}, // 9
+    {1, 0, 1, 0, 1, 0, 0}, // obstakel ({[([{({[({[({[({[({[{[[[[[(([{[{{({({({({([[[[[[([([{{3}}])])]]]]]])})})})})}}]}]))]]]]]}]})]})]})]})]})}])]})
+    {1, 0, 1, 0, 0, 0, 1}, // DOODLOPEND PAD
+    {0, 0, 1, 0, 1, 1, 1}  // F
+}; 
 boolean lijnsensoren[5];
 
 boolean startup = true;
@@ -33,13 +52,18 @@ void setup()
   pinMode(A2, INPUT);
   pinMode(A3, INPUT);
   pinMode(A4, INPUT);
+  for(int i = 1; i<14;i++){
+    if(i<4||i>7){
+      pinMode(i,OUTPUT);
+    }
+  }
 }
 
 void loop()
 {
-
-  if (state)
-  {
+dispr(false);
+  if(state){
+    dispnum(12); //display stars
     for (int i = 0; i < 5; i++)
     {
       if(analogRead(analog_pins[i]) < 200){
@@ -52,12 +76,24 @@ void loop()
         // delay(1000);
     }
 
+    distance = getdistance();
+    // PING SENSOR
+    if (distance < 6) {
+      analogWrite(E1, 0);
+      analogWrite(E2, 0);
+
+      delay(200);
+      digitalWrite(M1, HIGH);
+      digitalWrite(M2, HIGH);
+      turn(750);
+    }
+
     // Serial.println(sum(lijnsensoren, 5));
     // delay(1000);
 
-    int sumlijnsesoren = sum(lijnsensoren, 5);
+    int sumlijnsensoren = sum(lijnsensoren, 5);
 
-    if (sumlijnsesoren < 3 && sumlijnsesoren > 0)
+    if (sumlijnsensoren < 3 && sumlijnsensoren > 0)
     {
       difference = 2 - getNumber(lijnsensoren, 1);
       if (difference < 0)
@@ -77,28 +113,19 @@ void loop()
         digitalWrite(M1, LOW);
         digitalWrite(M2, HIGH);
       }
+  
+    }else if(sumlijnsensoren==0){
+      dispnum(11); //display void
+
     }
+        if(sumlijnsensoren == 5){
+        stop();
+        state = false;
+        
+      }
   }
-
-  // // Start driving, slow down when object is near
-  //   digitalWrite(M1, LOW);
-  //   digitalWrite(M2, HIGH);
-
-  // if(distance < 10) {
-  //   analogWrite(E1, 0);
-  //   analogWrite(E2, 0);
-  //   delay(1000);
-  //   startup=true;
-  //   start();
-  //   turn(1000);
-  //   startup=false;
-  // } else {
-  //   if(startup){
-  //   start();
-  //   startup=false;
-  //   }
-  // }
 }
+
 void start()
 {
   analogWrite(E1, 70); // PWM Speed Control
@@ -108,6 +135,11 @@ void start()
   analogWrite(E2, 55); // PWM Speed Control
 }
 
+void stop(){
+  analogWrite(E1, 0); // PWM Speed Control
+  analogWrite(E2, 0); // PWM Speed Control
+}
+
 void turn(int time)
 {
   //digitalWrite(M1, HIGH);
@@ -115,8 +147,8 @@ void turn(int time)
   analogWrite(E1, 70); // PWM Speed Control
   analogWrite(E2, 70); // PWM Speed Control
   delay(time);
-  analogWrite(E1, 55); // PWM Speed Control
-  analogWrite(E2, 55); // PWM Speed Control
+  analogWrite(E1, 50); // PWM Speed Control
+  analogWrite(E2, 50); // PWM Speed Control
 }
 
 int sum(bool arr[], int n)
@@ -162,3 +194,30 @@ int getdistance()
   // Serial.println(" cm");
   return distance;
 }
+  void dispnum(int n)
+  {
+    int m = 0;
+    for (int i = 3; i < 14; i++)
+    {
+      digitalWrite(i, segValue[n][m]);
+      m++;
+      if (i == 3)
+      {
+        i = i + 4;
+      }
+    }
+  }
+
+  void dispr(bool n)
+  {
+    if (n)
+    {
+      digitalWrite(1, HIGH);
+      digitalWrite(2, HIGH);
+    }
+    else
+    {
+      digitalWrite(1, LOW);
+      digitalWrite(2, HIGH);
+    }
+  }
