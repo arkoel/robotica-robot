@@ -1,0 +1,6 @@
+{
+    "sketch": "ultrasoundsensor\\ultrasoundsensor.ino",
+    "board": "arduino:avr:uno",
+    "programmer": "arduino:avrisp",
+    "port": "COM4"
+}

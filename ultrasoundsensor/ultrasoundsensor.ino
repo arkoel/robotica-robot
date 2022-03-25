@@ -1,5 +1,5 @@
-#define echoPin 2 // attach pin D2 Arduino to pin Echo of HC-SR04
-#define trigPin 3 // attach pin D3 Arduino to pin Trig of HC-SR04
+#define echoPin A5 // attach pin D2 Arduino to pin Echo of HC-SR04
+#define trigPin 0 // attach pin D3 Arduino to pin Trig of HC-SR04
 
 // defines variables
 long duration; // variable for the duration of sound wave travel
@@ -28,7 +28,8 @@ void setup()
 
   pinMode(M1, OUTPUT);
   pinMode(M2, OUTPUT);
-	@@ -41,89 +33,103 @@ void setup() {
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
   pinMode(A2, INPUT);
   pinMode(A3, INPUT);
   pinMode(A4, INPUT);
@@ -41,23 +42,35 @@ void loop()
   {
     for (int i = 0; i < 5; i++)
     {
-      lijnsensoren[i] = (analogRead(analog_pins[i]) < 30);
+      if(analogRead(analog_pins[i]) < 200){
+        lijnsensoren[i] = 1;
+      }
+      else if(analogRead(analog_pins[i]) > 200){
+        lijnsensoren[i] = 0;
+      }
+        // Serial.println(analogRead(analog_pins[i]));
+        // delay(1000);
     }
 
-    if (sum(lijnsensoren, 5) == 1)
+    // Serial.println(sum(lijnsensoren, 5));
+    // delay(1000);
+
+    int sumlijnsesoren = sum(lijnsensoren, 5);
+
+    if (sumlijnsesoren < 3 && sumlijnsesoren > 0)
     {
-      difference = 3 - getNumber(lijnsensoren, 1);
+      difference = 2 - getNumber(lijnsensoren, 1);
       if (difference < 0)
-      {
-        digitalWrite(M1, HIGH);
-        digitalWrite(M2, HIGH);
-        turn(abs(difference) * 500);
-      }
-      else if (difference > 0)
       {
         digitalWrite(M1, LOW);
         digitalWrite(M2, LOW);
-        turn(abs(difference) * 500);
+        turn(abs(difference) * 100);
+      }
+      else if (difference > 0)
+      {
+        digitalWrite(M1, HIGH);
+        digitalWrite(M2, HIGH);
+        turn(abs(difference) * 100);
       }
       else
       {
@@ -90,17 +103,20 @@ void start()
 {
   analogWrite(E1, 70); // PWM Speed Control
   analogWrite(E2, 70); // PWM Speed Control
-  delay(500);
-  analogWrite(E1, 45); // PWM Speed Control
-  analogWrite(E2, 45); // PWM Speed Control
+  delay(200);
+  analogWrite(E1, 55); // PWM Speed Control
+  analogWrite(E2, 55); // PWM Speed Control
 }
 
 void turn(int time)
 {
-  digitalWrite(M1, HIGH);
-  digitalWrite(M2, HIGH);
-  start();
+  //digitalWrite(M1, HIGH);
+  //digitalWrite(M2, HIGH);
+  analogWrite(E1, 70); // PWM Speed Control
+  analogWrite(E2, 70); // PWM Speed Control
   delay(time);
+  analogWrite(E1, 55); // PWM Speed Control
+  analogWrite(E2, 55); // PWM Speed Control
 }
 
 int sum(bool arr[], int n)
@@ -109,9 +125,9 @@ int sum(bool arr[], int n)
 
   // Iterate through all elements
   // and add them to sum
-  for (int i = 0; i < n; i++)
+  for (int i = 0; i < n; i++) {
     sum += int(arr[i]);
-
+  }
   return sum;
 }
 
@@ -132,7 +148,12 @@ int getdistance()
   // Clears the trigPin condition
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
-	@@ -136,8 +142,8 @@ int getdistance(){
+  // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
   // Calculating the distance
   distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
   // Displays the distance on the Serial Monitor
