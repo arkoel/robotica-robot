@@ -1,7 +1,6 @@
 #define echoPin A5 // attach pin D2 Arduino to pin Echo of HC-SR04
 #define trigPin 0  // attach pin D3 Arduino to pin Trig of HC-SR04
 
-// defines variables
 long duration; // variable for the duration of sound wave travel
 int distance;  // variable for the distance measurement
 
@@ -9,6 +8,7 @@ int E1 = 5;
 int M1 = 4;
 int E2 = 6;
 int M2 = 7;
+
 byte segValue[10][7] = {
     {1, 1, 1, 1, 1, 1, 0}, // 0
     {1, 0, 0, 1, 0, 0, 0}, // 1
@@ -21,16 +21,16 @@ byte segValue[10][7] = {
     {1, 1, 1, 1, 1, 1, 1}, // 8
     {1, 1, 0, 1, 1, 1, 1}  // 9
 };
-boolean lijnsensoren[5];
 
+boolean lijnsensoren[5];
 boolean startup = true;
 static const uint8_t analog_pins[] = {A0, A1, A2, A3, A4};
 boolean state = 1;
 // state 1=straight, 0=turning
 int difference;
 int turns;
-void setup()
-{
+
+void setup() {
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an OUTPUT
   pinMode(echoPin, INPUT);  // Sets the echoPin as an INPUT
   // Serial.begin(9600); // // Serial Communication is starting with 9600 of baudrate speed
@@ -46,18 +46,13 @@ void setup()
   pinMode(A4, INPUT);
 }
 
-void loop()
-{
-  if (state)
-  {
-    for (int i = 0; i < 5; i++)
-    {
-      if (analogRead(analog_pins[i]) < 200)
-      {
+void loop() {
+  if (state) {
+    for (int i = 0; i < 5; i++) {
+      if (analogRead(analog_pins[i]) < 200) {
         lijnsensoren[i] = 1;
       }
-      else if (analogRead(analog_pins[i]) > 200)
-      {
+      else if (analogRead(analog_pins[i]) > 200) {
         lijnsensoren[i] = 0;
       }
       // Serial.println(analogRead(analog_pins[i]));
@@ -79,60 +74,49 @@ void loop()
 
     int sumlijnsensoren = sum(lijnsensoren, 5);
 
-    if (sumlijnsensoren < 3 && sumlijnsensoren > 0)
-    {
+    if (sumlijnsensoren < 3 && sumlijnsensoren > 0) {
       difference = 2 - getNumber(lijnsensoren, 1);
-      if (difference < 0)
-      {
+      if (difference < 0) {
         if (turns < 9){turns++;}
         dispnum(turns);
         dispr(false);
         turnLeft(difference);
-      }
-      else if (difference > 0)
-      {
+      } else if (difference > 0) {
         if (turns < 9){turns++;}
-          dispnum(turns);
-          dispr(true);
-          turnRight(difference);
-        }
-        else
-        {
-          digitalWrite(M1, LOW);
-          digitalWrite(M2, HIGH);
-          speed(100);
-        }
-
-        // if (sumlijnsensoren == 5)
-        // {
-        //   turnRight();
-        // }
+        dispnum(turns);
+        dispr(true);
+        turnRight(difference);
+      } else {
+        digitalWrite(M1, LOW);
+        digitalWrite(M2, HIGH);
+        speed(100);
       }
-      // else if (sumlijnsensoren == 0) {
+
+      // if (sumlijnsensoren == 5)
+      // {
+      //   turnRight();
+      // }
+    }// else if (sumlijnsensoren == 0) {
       //     analogWrite(E1, 0); // PWM Speed Control
       //     analogWrite(E2, 0); // PWM Speed Control
       //     one_eighty(400);
       // }
-      
     }
   }
 
-  void turnRight(int difference)
-  {
+  void turnRight(int difference) {
     digitalWrite(M1, HIGH);
     digitalWrite(M2, HIGH);
     turn(abs(difference) * 50);
   }
 
-  void turnLeft(int difference)
-  {
+  void turnLeft(int difference) {
     digitalWrite(M1, LOW);
     digitalWrite(M2, LOW);
     turn(abs(difference) * 50);
   }
 
-  void turn(int time)
-  {
+  void turn(int time) {
     analogWrite(E1, 70); // PWM Speed Control
     analogWrite(E2, 70); // PWM Speed Control
     delay(time);
@@ -140,8 +124,7 @@ void loop()
     analogWrite(E2, 50); // PWM Speed Control
   }
 
-  void speed(int time)
-  {
+  void speed(int time) {
     // digitalWrite(M1, HIGH);
     // digitalWrite(M2, HIGH);
     analogWrite(E1, 70); // PWM Speed Control
@@ -151,33 +134,27 @@ void loop()
     analogWrite(E2, 35); // PWM Speed Control
   }
 
-  int sum(bool arr[], int n)
-  {
+  int sum(bool arr[], int n) {
     int sum = 0; // initialize sum
 
     // Iterate through all elements
     // and add them to sum
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++) {
       sum += int(arr[i]);
     }
     return sum;
   }
 
-  int getNumber(bool arr[], int n)
-  {
-    for (int i = 0; i < 5; i++)
-    {
-      if (arr[i] == 1)
-      {
+  int getNumber(bool arr[], int n) {
+    for (int i = 0; i < 5; i++) {
+      if (arr[i] == 1) {
         return i;
       }
     }
     return 0;
   }
 
-  int getdistance()
-  {
+  int getdistance() {
     // Clears the trigPin condition
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
@@ -196,29 +173,23 @@ void loop()
     return distance;
   }
 
-  void dispnum(int n)
-  {
+  void dispnum(int n) {
     int m = 0;
-    for (int i = 3; i < 14; i++)
-    {
+    for (int i = 3; i < 14; i++) {
       digitalWrite(i, segValue[n][m]);
       m++;
-      if (i == 3)
-      {
+      if (i == 3) {
         i = i + 4;
       }
     }
   }
 
-  void dispr(bool n)
-  {
-    if (n)
-    {
+  void dispr(bool n) {
+    if (n) {
       digitalWrite(1, HIGH);
       digitalWrite(2, HIGH);
     }
-    else
-    {
+    else {
       digitalWrite(1, LOW);
       digitalWrite(2, HIGH);
     }
