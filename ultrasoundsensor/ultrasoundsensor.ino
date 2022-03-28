@@ -1,8 +1,8 @@
-#define echoPin A5 // attach pin D2 Arduino to pin Echo of HC-SR04
-#define trigPin 0  // attach pin D3 Arduino to pin Trig of HC-SR04
+#define echoPin A5
+#define trigPin 0 
 
-long duration; // variable for the duration of sound wave travel
-int distance;  // variable for the distance measurement
+long duration;
+int distance; 
 
 int E1 = 5;
 int M1 = 4;
@@ -13,7 +13,7 @@ bool oplossingsRoute[100];
 int bochtNr = 0;
 int oplossingSom = 0;
 
-byte segValue[13][7] = {
+byte segValue[14][7] = {
     {1, 1, 1, 1, 1, 1, 0}, // 0
     {1, 0, 0, 1, 0, 0, 0}, // 1
     {0, 1, 1, 1, 1, 0, 1}, // 2
@@ -26,23 +26,22 @@ byte segValue[13][7] = {
     {1, 1, 0, 1, 1, 1, 1}, // 9
     {1, 0, 1, 0, 1, 0, 0}, // obstakel
     {1, 0, 1, 0, 0, 0, 1}, // DOODLOPEND PAD
-    {0, 0, 1, 0, 1, 1, 1}  // F
+    {0, 0, 1, 0, 1, 1, 1}, // F
+    {0, 0, 0, 0, 0, 0, 0}  // UIT
 }; 
 
 boolean lijnsensoren[5];
 boolean startup = true;
 static const uint8_t analog_pins[] = {A0, A1, A2, A3, A4};
-boolean state = 1;
+int state = 1;
 // state 1=straight, 0=turning
 int difference;
 int turns = 0;
 
 void setup() {
-  pinMode(trigPin, OUTPUT); // Sets the trigPin as an OUTPUT
-  pinMode(echoPin, INPUT);  // Sets the echoPin as an INPUT
-  // Serial.begin(9600); // // Serial Communication is starting with 9600 of baudrate speed
-  // Serial.println("Ultrasonic Sensor HC-SR04 Test"); // print some text in Serial Monitor
-  // Serial.println("with Arduino UNO R3");
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT); 
+
 
   pinMode(M1, OUTPUT);
   pinMode(M2, OUTPUT);
@@ -59,8 +58,9 @@ void setup() {
 }
 
 void loop() {
-  dispnum(turns);
-  if (state) {
+  
+  if (state==1) {
+    dispnum(turns);
     for (int i = 0; i < 5; i++) {
       if (analogRead(analog_pins[i]) < 200) {
         lijnsensoren[i] = 1;
@@ -73,7 +73,7 @@ void loop() {
     }
     distance = getdistance();
     // PING SENSOR
-    if (distance < 4 && turns>0) {
+    if (distance < 8 && turns>0) {
       dispnum(10);
       digitalWrite(1, LOW);
       digitalWrite(2, LOW);
@@ -88,7 +88,7 @@ void loop() {
     // delay(1000);
 
     int sumlijnsensoren = sum(lijnsensoren, 5);
-    if (sumlijnsensoren < 3 && sumlijnsensoren > 0) {
+    if (sumlijnsensoren < 5 && sumlijnsensoren > 0) {
       difference = 2 - getNumber(lijnsensoren);
       if (difference < 0) {
         if(abs(difference)==2){
@@ -114,10 +114,13 @@ void loop() {
         speed(250);
       }
     }
-    if (sumlijnsensoren == 5) { // FINSIH
+    if (sumlijnsensoren == 5) { // MISSCHIEN FINNISH
+      analogWrite(E1, 0);
+      analogWrite(E2, 0);
+      delay(1000);
       digitalWrite(M1, HIGH);
       digitalWrite(M2, LOW);
-      speed(300);
+      speed(100);
       analogWrite(E1, 0);
       analogWrite(E2, 0);
       for (int i = 0; i < 5; i++) {
@@ -128,28 +131,30 @@ void loop() {
         }
       }
       int sumlijnsensoren = sum(lijnsensoren, 5);
-      if (sumlijnsensoren == 5) { // FINSIH
-
-     
-      state = false;
-      
-      //Fi display
-      dispnum(12);
-      dispr(0);
-      delay(1000);
-      
-      // Laat route zien (bijv. L, L, R, L, R)
-      for(int i=0; i<oplossingSom; i++) {
+      if (sumlijnsensoren == 5) { // FINNISH
         digitalWrite(1, LOW);
         digitalWrite(2, LOW);
-        delay(400);
-        dispr(oplossingsRoute[i]);
-        delay(1000);
-      }
-      dispnum(12);
-      dispr(0);
-      delay(9000);
-      } else{
+        for(int j = 9;j>=0;j--){
+          dispnum(j);
+          delay(1000);
+        }
+        delay(1000); //10de seconde
+        state = 0;
+        // Laat route zien (bijv. L, L, R, L, R)
+        dispnum(13);
+        for(int i=0; i<oplossingSom; i++) {
+          digitalWrite(1, LOW);
+          digitalWrite(2, LOW);
+          delay(400);
+          dispr(oplossingsRoute[i]);
+          delay(1000);
+        }
+        dispnum(12);
+        dispr(0);
+        delay(10000);
+        state=0;
+        // delay(10000);
+      } else {
       //omdraaien toch geen finish
 
       }
@@ -163,6 +168,15 @@ void loop() {
       turnRight(4);
     }
   } 
+
+  if(state==0){
+    digitalWrite(1, LOW);
+    digitalWrite(2, LOW);
+    for(int i = 10; i>=0; i--){
+      dispnum(i);
+    }
+    state = 1;
+  }
 }
 
 void turnRight(int difference) {
