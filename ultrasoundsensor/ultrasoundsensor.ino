@@ -35,7 +35,7 @@ boolean startup = true;
 static const uint8_t analog_pins[] = {A0, A1, A2, A3, A4};
 int state = 1;
 // state 1=straight, 0=turning
-int difference;
+double difference;
 int turns = 0;
 
 void setup() {
@@ -88,8 +88,9 @@ void loop() {
     // delay(1000);
 
     int sumlijnsensoren = sum(lijnsensoren, 5);
-    if (sumlijnsensoren < 5 && sumlijnsensoren > 0) {
+    if (sumlijnsensoren < 3 && sumlijnsensoren > 0) {
       difference = 2 - getNumber(lijnsensoren);
+      
       if (difference < 0) {
         if(abs(difference)==2){
           if (turns < 9){turns++;}
@@ -97,6 +98,7 @@ void loop() {
           bochtNr++;
           oplossingSom++;
           oplossingsRoute[bochtNr] = 0;
+          difference *= 1.2;
         }
         turnLeft(difference);
       } else if (difference > 0) {
@@ -106,6 +108,7 @@ void loop() {
           bochtNr++;
           oplossingSom++;
           oplossingsRoute[bochtNr] = 1;
+          difference *= 1.2;
         }
         turnRight(difference);
       }else{
@@ -160,12 +163,26 @@ void loop() {
       }
     }
     if(sumlijnsensoren == 0) {
-      digitalWrite(M1, LOW);
-      digitalWrite(M2, HIGH);
-      dispnum(11);
-      // exit(0);
-      //delay(1000);
-      turnRight(4);
+      delay(200);
+      for (int i = 0; i < 5; i++) {
+         if (analogRead(analog_pins[i]) < 200) {
+           lijnsensoren[i] = 1;
+         }
+         else if (analogRead(analog_pins[i]) > 200) {
+           lijnsensoren[i] = 0;
+         }
+      }
+      sumlijnsensoren = sum(lijnsensoren, 5);
+      if(sumlijnsensoren == 0){
+        digitalWrite(M1, LOW);
+        digitalWrite(M2, HIGH);
+        dispnum(11);
+        // exit(0);
+        //delay(1000);
+        digitalWrite(M1, HIGH);
+        digitalWrite(M2, HIGH);
+        turn(abs(4) * 150 , 0);
+      }
     }
   } 
 
@@ -182,32 +199,32 @@ void loop() {
 void turnRight(int difference) {
   digitalWrite(M1, HIGH);
   digitalWrite(M2, HIGH);
-  turn(abs(difference) * 150);
+  turn(abs(difference) * 150 , 0);
 }
 
 void turnLeft(int difference) {
   digitalWrite(M1, LOW);
   digitalWrite(M2, LOW);
-  turn(abs(difference) * 150);
+  turn(abs(difference) * 150 , 0);
 }
 
-void turn(int time) {
-  analogWrite(E1, 70);
-  analogWrite(E2, 75); 
+void turn(int time, int faster) {
+  analogWrite(E1, 240);
+  analogWrite(E2, 240); 
   delay(100);
-  analogWrite(E1, 40); 
-  analogWrite(E2, 40); 
+  analogWrite(E1, 245); 
+  analogWrite(E2, 240); 
   delay(time-100);
   analogWrite(E1, 0);
   analogWrite(E2, 0);
 }
 
 void speed(int time) {
-  analogWrite(E1, 70); 
-  analogWrite(E2, 70);
+  analogWrite(E1, 240); 
+  analogWrite(E2, 240);
   delay(100);
-  analogWrite(E1, 35);
-  analogWrite(E2, 35);
+  analogWrite(E1, 240);
+  analogWrite(E2, 240);
   delay(time-100);
 }
 
