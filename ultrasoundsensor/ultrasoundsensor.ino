@@ -68,8 +68,6 @@ void loop() {
       else if (analogRead(analog_pins[i]) > 200) {
         lijnsensoren[i] = 0;
       }
-      // Serial.println(analogRead(analog_pins[i]));
-      // delay(1000);
     }
     distance = getdistance();
     // PING SENSOR
@@ -80,43 +78,14 @@ void loop() {
       analogWrite(E1, 0);
       analogWrite(E2, 0);
       delay(750);
-      turnRight(4);
-      // delay(250);
+      turnRight(4, 0);
     }
 
-    // Serial.println(sum(lijnsensoren, 5));
-    // delay(1000);
 
     int sumlijnsensoren = sum(lijnsensoren, 5);
-    if (sumlijnsensoren < 3 && sumlijnsensoren > 0) {
-      difference = 2 - getNumber(lijnsensoren);
-      
-      if (difference < 0) {
-        if(abs(difference)==2){
-          if (turns < 9){turns++;}
-          dispr(false);
-          bochtNr++;
-          oplossingSom++;
-          oplossingsRoute[bochtNr] = 0;
-          difference *= 1.2;
-        }
-        turnLeft(difference);
-      } else if (difference > 0) {
-        if(abs(difference)==2){
-          if (turns < 9){turns++;}
-          dispr(true);
-          bochtNr++;
-          oplossingSom++;
-          oplossingsRoute[bochtNr] = 1;
-          difference *= 1.2;
-        }
-        turnRight(difference);
-      }else{
-        digitalWrite(M1, HIGH);
-        digitalWrite(M2, LOW);
-        speed(250);
-      }
-    }
+    difference = 2 - getNumber(lijnsensoren);
+
+   //als alle sensoren branden
     if (sumlijnsensoren == 5) { // MISSCHIEN FINNISH
       analogWrite(E1, 0);
       analogWrite(E2, 0);
@@ -135,8 +104,6 @@ void loop() {
       }
       int sumlijnsensoren = sum(lijnsensoren, 5);
       if (sumlijnsensoren == 5) { // FINNISH
-        digitalWrite(1, LOW);
-        digitalWrite(2, LOW);
         for(int j = 9;j>=0;j--){
           dispnum(j);
           delay(1000);
@@ -146,8 +113,6 @@ void loop() {
         // Laat route zien (bijv. L, L, R, L, R)
         dispnum(13);
         for(int i=0; i<oplossingSom; i++) {
-          digitalWrite(1, LOW);
-          digitalWrite(2, LOW);
           delay(400);
           dispr(oplossingsRoute[i]);
           delay(1000);
@@ -162,6 +127,8 @@ void loop() {
 
       }
     }
+
+    //als geen sensor brand
     if(sumlijnsensoren == 0) {
       delay(200);
       for (int i = 0; i < 5; i++) {
@@ -177,11 +144,41 @@ void loop() {
         digitalWrite(M1, LOW);
         digitalWrite(M2, HIGH);
         dispnum(11);
-        // exit(0);
-        //delay(1000);
+        turnRight(4, 10);
+      }
+    }
+
+    //als 1 tot 4 sensoren aan staan
+    if (abs(difference) == 0||abs(difference) == 1){
+      if (difference == -1) {
+         turnLeft(1, -10);
+      }else if (difference == 1){
+        turnRight(1, -10);
+      } else{
+        //straight
         digitalWrite(M1, HIGH);
-        digitalWrite(M2, HIGH);
-        turn(abs(4) * 150 , 0);
+        digitalWrite(M2, LOW);
+        speed(150);
+      }
+    }
+    if(abs(difference)==2){
+      if(difference==-2){
+      if (turns < 9){turns++;}
+        dispr(false);
+        bochtNr++;
+        oplossingSom++;
+        oplossingsRoute[bochtNr] = 0;
+        difference *= 1.2;
+        turnLeft(difference, 0);
+
+      }else if(difference==2){
+        if (turns < 9){turns++;}
+        dispr(true);
+        bochtNr++;
+        oplossingSom++;
+        oplossingsRoute[bochtNr] = 1;
+        difference *= 1.2;
+        turnRight(difference, 0);      
       }
     }
   } 
@@ -196,35 +193,35 @@ void loop() {
   }
 }
 
-void turnRight(int difference) {
+void turnRight(int difference, int faster) {
   digitalWrite(M1, HIGH);
   digitalWrite(M2, HIGH);
-  turn(abs(difference) * 150 , 0);
+  turn(abs(difference) * 150 , faster);
 }
 
-void turnLeft(int difference) {
+void turnLeft(int difference, int faster) {
   digitalWrite(M1, LOW);
   digitalWrite(M2, LOW);
-  turn(abs(difference) * 150 , 0);
+  turn(abs(difference) * 150 , faster);
 }
 
 void turn(int time, int faster) {
-  analogWrite(E1, 240);
-  analogWrite(E2, 240); 
+  analogWrite(E1, 70+faster);
+  analogWrite(E2, 75+faster); 
   delay(100);
-  analogWrite(E1, 245); 
-  analogWrite(E2, 240); 
+  analogWrite(E1, 40); 
+  analogWrite(E2, 40); 
   delay(time-100);
   analogWrite(E1, 0);
   analogWrite(E2, 0);
 }
 
 void speed(int time) {
-  analogWrite(E1, 240); 
-  analogWrite(E2, 240);
+  analogWrite(E1, 70); 
+  analogWrite(E2, 70);
   delay(100);
-  analogWrite(E1, 240);
-  analogWrite(E2, 240);
+  analogWrite(E1, 35);
+  analogWrite(E2, 35);
   delay(time-100);
 }
 
@@ -260,14 +257,9 @@ int getdistance() {
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
-  // Reads the echoPin, returns the sound wave travel time in microseconds
+  //
   duration = pulseIn(echoPin, HIGH);
-  // Calculating the distance
-  distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
-  // Displays the distance on the Serial Monitor
-  // Serial.print("Distance: ");
-  // Serial.print(distance);
-  // Serial.println(" cm");
+  distance = duration * 0.034 / 2;
   return distance;
 }
 
